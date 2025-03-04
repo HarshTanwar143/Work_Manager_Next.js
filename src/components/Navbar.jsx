@@ -1,119 +1,174 @@
 "use client";
-import UserContext from '@/context/userContext';
-import { logoutUser } from '@/services/logoutUser';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React, { useContext, useState } from 'react';
-import { toast } from 'react-toastify';
-import { FiMenu } from 'react-icons/fi';
-import { IoClose } from 'react-icons/io5';
+import UserContext from "@/context/userContext";
+import { logoutUser } from "@/services/logoutUser";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React, { useContext, useState, useEffect, useRef } from "react";
+import { toast } from "react-toastify";
+import { FiMenu } from "react-icons/fi";
+import { IoClose } from "react-icons/io5";
 
 const Navbar = () => {
   const router = useRouter();
   const context = useContext(UserContext);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null); // Reference for the mobile menu
+
+  // ✅ Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    }
+
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
+  // ✅ Close menu after navigation
+  useEffect(() => {
+    const handleRouteChange = () => setMenuOpen(false);
+    router.events?.on("routeChangeComplete", handleRouteChange);
+
+    return () => {
+      router.events?.off("routeChangeComplete", handleRouteChange);
+    };
+  }, [router]);
 
   async function handleLogout() {
     try {
       const result = await logoutUser();
       context.setUser(undefined);
-      router.push('/');
+      router.push("/");
       toast.success(result.message, {
-        position: 'top-center',
+        position: "top-center",
       });
+      setMenuOpen(false); // ✅ Close menu after logout
     } catch (error) {
-      console.log('error in logout');
-      toast.error('Something went wrong!', {
-        position: 'top-center',
+      console.log("error in logout");
+      toast.error("Something went wrong!", {
+        position: "top-center",
       });
     }
   }
 
   return (
-    <nav className='flex justify-between items-center shadow-[0px_5px_20px_2px_rgba(128,0,255,0.4)] px-10 py-5 mb-5 relative'>
-      <h1 className='font-bold text-3xl'>
-        <Link href='/'>Work Manager</Link>
+    <nav className="flex justify-between items-center shadow-[0px_5px_20px_2px_rgba(128,0,255,0.4)] px-10 py-5 mb-5 relative">
+      <h1 className="font-bold text-3xl">
+        <Link href="/">Work Manager</Link>
       </h1>
-      
+
       {/* Centered Nav Links (Only for logged-in users & md+) */}
       {context.user && (
-        <ul className='hidden md:flex space-x-5 font-semibold'>
-          <li className='cursor-pointer hover:scale-95 transition duration-200'><Link href='/'>Home</Link></li>
-          <li className='cursor-pointer hover:scale-95 transition duration-200'><Link href='/add-task'>Add Task</Link></li>
-          <li className='cursor-pointer hover:scale-95 transition duration-200'><Link href='/show-tasks'>Show Tasks</Link></li>
+        <ul className="hidden md:flex space-x-5 font-semibold">
+          <li className="cursor-pointer hover:scale-95 transition duration-200">
+            <Link href="/">Home</Link>
+          </li>
+          <li className="cursor-pointer hover:scale-95 transition duration-200">
+            <Link href="/add-task">Add Task</Link>
+          </li>
+          <li className="cursor-pointer hover:scale-95 transition duration-200">
+            <Link href="/show-tasks">Show Tasks</Link>
+          </li>
         </ul>
       )}
 
-      {/* Right Side Buttons */}
-      <div className='hidden md:flex space-x-4 font-semibold'>
+      {/* Right Side Buttons (Hidden on Small Screens) */}
+      <div className="hidden md:flex space-x-4 font-semibold">
         {context.user ? (
           <>
-            <Link href='/profile/user'>
-              <button className='border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200'>
-                {context.user.name.length > 15 ? context.user.name.split(' ')[0] : context.user.name}
+            <Link href="/profile/user">
+              <button className="border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200">
+                {context.user.name.length > 15
+                  ? context.user.name.split(" ")[0]
+                  : context.user.name}
               </button>
             </Link>
-            <button onClick={handleLogout} className='border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200'>
+            <button
+              onClick={handleLogout}
+              className="border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200"
+            >
               Logout
             </button>
           </>
         ) : (
           <>
-            <Link href='/login'>
-              <button className='border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200'>Login</button>
+            <Link href="/login">
+              <button className="border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200">
+                Login
+              </button>
             </Link>
-            <Link href='/signup'>
-              <button className='border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200'>SignUp</button>
+            <Link href="/signup">
+              <button className="border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200">
+                SignUp
+              </button>
             </Link>
           </>
         )}
       </div>
 
       {/* Mobile Menu Button */}
-      <div className='md:hidden'>
+      <div className="md:hidden">
         <button onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? <IoClose size={30} /> : <FiMenu size={30} />}
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu (Hidden on md and larger screens) */}
       {menuOpen && (
-        <div className='absolute top-16 right-10 bg-white p-5 shadow-md rounded-md flex flex-col items-center space-y-3 text-violet-800 font-semibold md:hidden'>
+        <div
+          ref={menuRef}
+          className="absolute top-16 right-10 bg-white p-5 shadow-md rounded-md flex flex-col items-center space-y-3 text-violet-800 font-semibold md:hidden"
+        >
           {context.user ? (
             <>
-              <Link href='/' className='w-full flex justify-center'>
-                  <span className='w-full text-center border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200'>
-                    Home
-                  </span>
+              <Link href="/" className="w-full flex justify-center" onClick={() => setMenuOpen(false)}>
+                <span className="w-full text-center border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200">
+                  Home
+                </span>
               </Link>
-              <Link href='/add-task' className='w-full flex justify-center'>
-                  <span className='w-full text-center border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200'>
-                    Add Task
-                  </span>
+              <Link href="/add-task" className="w-full flex justify-center" onClick={() => setMenuOpen(false)}>
+                <span className="w-full text-center border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200">
+                  Add Task
+                </span>
               </Link>
-              <Link href='/show-tasks' className='w-full flex justify-center'>
-                  <span className='w-full text-center border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200'>
-                    Show Tasks
-                  </span>
+              <Link href="/show-tasks" className="w-full flex justify-center" onClick={() => setMenuOpen(false)}>
+                <span className="w-full text-center border border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200">
+                  Show Tasks
+                </span>
               </Link>
 
-
-              <Link href='/profile/user' className='w-full flex justify-center'>
-                <button className='border border-white w-full rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200'>
-                  {context.user.name.length > 15 ? context.user.name.split(' ')[0] : context.user.name}
+              <Link href="/profile/user" className="w-full flex justify-center" onClick={() => setMenuOpen(false)}>
+                <button className="border border-white w-full rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200">
+                  {context.user.name.length > 15
+                    ? context.user.name.split(" ")[0]
+                    : context.user.name}
                 </button>
               </Link>
-              <button onClick={handleLogout} className='border w-full border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200'>
+              <button
+                onClick={handleLogout}
+                className="border w-full border-white rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200"
+              >
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link href='/login' className='w-full flex justify-center'>
-                <button className='border border-white w-full rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200'>Login</button>
+              <Link href="/login" className="w-full flex justify-center" onClick={() => setMenuOpen(false)}>
+                <button className="border border-white w-full rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200">
+                  Login
+                </button>
               </Link>
-              <Link href='/signup'  className='w-full flex justify-center'>
-                <button className='border border-white w-full rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200'>SignUp</button>
+              <Link href="/signup" className="w-full flex justify-center" onClick={() => setMenuOpen(false)}>
+                <button className="border border-white w-full rounded px-4 py-1 cursor-pointer hover:text-white text-violet-800 hover:bg-violet-800 bg-white transition-all duration-200">
+                  SignUp
+                </button>
               </Link>
             </>
           )}
