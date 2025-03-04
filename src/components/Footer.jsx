@@ -15,12 +15,11 @@ const Footer = () => {
       <div className="flex flex-col items-center w-full md:w-[30%] p-4 mt-8 md:mt-0">
         <b className="text-lg mb-6 md:mb-10"><i>IMPORTANT LINKS</i></b>
         <ul className="list-none flex flex-wrap justify-center text-center gap-4 md:gap-6">
-          <li className="min-w-[80px] md:min-w-[100px]">Instagram</li>
-          <li className="min-w-[80px] md:min-w-[100px]">Facebook</li>
-          <li className="min-w-[80px] md:min-w-[100px]">LinkedIn</li>
-          <li className="min-w-[80px] md:min-w-[100px]">GitHub</li>
-          <li className="min-w-[80px] md:min-w-[100px]">YouTube</li>
-          <li className="min-w-[80px] md:min-w-[100px]">Twitter</li>
+          <li className="min-w-[80px] md:min-w-[100px] hover:text-violet-800 transition-colors duration-200"><a href='https://leetcode.com/u/Harsh_tanwar65/' target='_blank'>Leetcode</a></li>
+          <li className="min-w-[80px] md:min-w-[100px] hover:text-violet-800 transition-colors duration-200"><a href='https://www.geeksforgeeks.org/user/harshtanwar14/' target='_blank'>GFG</a></li>
+          <li className="min-w-[80px] md:min-w-[100px] hover:text-violet-800 transition-colors duration-200"><a href='https://www.linkedin.com/in/harsh-tanwar-04315b247/' target="_blank">LinkedIn</a></li>
+          <li className="min-w-[80px] md:min-w-[100px] hover:text-violet-800 transition-colors duration-200"><a href='https://github.com/HarshTanwar143' target='_blank'>GitHub</a></li>
+          <li className="min-w-[80px] md:min-w-[100px] hover:text-violet-800 transition-colors duration-200"><a href='https://www.codechef.com/users/harsh65' target='_blank'>CodeChef</a></li>
         </ul>
       </div>
     </div>
